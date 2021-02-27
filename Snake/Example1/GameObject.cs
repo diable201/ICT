@@ -34,5 +34,19 @@ namespace Example1
                 Console.Write(' ');
             }
         }
+
+        public bool IsIntersected(List<Point> points)
+        {
+            bool res = false;
+            foreach (Point p in points)
+            {
+                if (p.X == body[0].X && p.Y == body[0].Y)
+                {
+                    res = true;
+                    break;
+                }
+            }
+            return res;
+        }
     }
 }

@@ -6,12 +6,14 @@ namespace Example1
 {
     class Worm : GameObject
     {
+        protected int lengthOfWorm;
         public Worm(char sign, ConsoleColor color) : base(sign, color)
         {
             Point head = new Point { X = 20, Y = 20 };
             body = new List<Point>();
             body.Add(head);
             Draw();
+            lengthOfWorm = 1;
         }
 
 
@@ -32,7 +34,15 @@ namespace Example1
         public void Increase(Point point)
         {
             body.Add(new Point { X = point.X, Y = point.Y });
+            lengthOfWorm++;
         }
 
+        public int LengthOfWorm
+        {
+            get
+            {
+                return lengthOfWorm;
+            }
+        }
     }
 }
