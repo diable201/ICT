@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace ConsoleApp
+namespace FileManager
 {
     internal class Layer
     {
@@ -33,11 +33,82 @@ namespace ConsoleApp
             Content.AddRange(dir.GetFiles());
         }
 
-        public void PrintInfo()
+        
+        public void OpenFile()      
         {
             Console.BackgroundColor = ConsoleColor.DarkBlue;
             Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            string txt = File.ReadAllText(Content[Pos].FullName);
+            Console.WriteLine(txt);
+            Console.ReadKey();
+        }
+
+        public void Delete() 
+        {
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.White;
+            Content[Pos].Delete();
+            Console.WriteLine("Succesfully deleted!");
+            Console.ReadKey();
+        }
+
+        public void Write()
+        {
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Input: ");
+            string text = Console.ReadLine();
+            using StreamWriter sw = new StreamWriter(Content[Pos].FullName);
+            sw.WriteLine(text);
+        }
+
+        public void Append()
+        {
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Append: ");
+            string text = Console.ReadLine();
+            using StreamWriter sw= File.AppendText(Content[Pos].FullName);
+            sw.WriteLine(text);
+        }
+
+        public void Rename() 
+        {
+            string parent = new DirectoryInfo(Content[Pos].FullName).Parent.FullName;
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("Write new name: ");
+            string name = Console.ReadLine();
+            if (Content[Pos] is DirectoryInfo)
+            {
+                Directory.Move(Content[Pos].FullName, parent + '/' + name);
+            }
+            else
+            {
+                File.Move(Content[Pos].FullName, parent + '/' + name);
+            }
+        }
+
+
+        public void PrintInfo()
+        {
+            string path = "";
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Welcome To File Manager!");
+            Console.WriteLine("Open: Enter or O for files | Rename: TAB | Delete: D | Write: W | Append: A | Back: BackSpace | Close: ESC");
+            int fCount = Directory.GetFiles(path, "*", SearchOption.AllDirectories).Length;
+            int dCount = Directory.GetDirectories(path, "*", SearchOption.AllDirectories).Length;
+            Console.WriteLine("Date: " + DateTime.Now);
+            Console.WriteLine("Number of Files " + fCount);
+            Console.WriteLine("Number of Directories " + dCount);
+            Console.WriteLine("List of files:\n");
             int cnt = 0;
             foreach (DirectoryInfo d in Dir.GetDirectories())
             {
@@ -49,11 +120,10 @@ namespace ConsoleApp
                 {
                     Console.BackgroundColor = ConsoleColor.DarkBlue;
                 }
-
                 Console.WriteLine(d.Name);
                 cnt++;
             }
-            Console.ForegroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
             foreach (FileInfo f in Dir.GetFiles())
             {
                 if (cnt == Pos)
@@ -64,7 +134,6 @@ namespace ConsoleApp
                 {
                     Console.BackgroundColor = ConsoleColor.DarkBlue;
                 }
-
                 Console.WriteLine(f.Name);
                 cnt++;
             }
@@ -85,11 +154,12 @@ namespace ConsoleApp
             {
                 Pos--;
             }
-            
+
             if (Pos >= Content.Count)
             {
                 Pos = 0;
-            } else if (Pos < 0)
+            }
+            else if (Pos < 0)
             {
                 Pos = Content.Count - 1;
             }
@@ -100,91 +170,85 @@ namespace ConsoleApp
     {
         private static void Main(string[] args)
         {
-            F3();
+            ManagerStart();
         }
 
-        private static void PrintFolderInfo(string path, int pos)
-        {
-            // Console.BackgroundColor = ConsoleColor.Blue;
-            DirectoryInfo dir = new DirectoryInfo(path);
-            Console.ForegroundColor = ConsoleColor.White;
-            int cnt = 0;
-            foreach (DirectoryInfo d in dir.GetDirectories())
-            {
-                if (cnt == pos)
-                    Console.BackgroundColor = ConsoleColor.Cyan;
-                else
-                    Console.BackgroundColor = ConsoleColor.Black;
-                Console.WriteLine(d.Name);
-                cnt++;
-            }
-            Console.ForegroundColor = ConsoleColor.Red;
-            foreach (FileInfo d in dir.GetFiles())
-            {
-                Console.WriteLine(d.Name);
-            }
-        }
-        
-        private static void F3()
+        private static void ManagerStart()
         {
             Stack<Layer> history = new Stack<Layer>();
             history.Push(new Layer(new DirectoryInfo
-                ("/Users/sanzhar/Documents/"),0));
-            // int pos = 0;
+                (""), 0));
+            Console.CursorVisible = false;
             bool escape = false;
-
-            // DirectoryInfo dir = new DirectoryInfo("/Users/sanzhar/Downloads/");
-            // List<FileSystemInfo> fileSystemInfo = new List<FileSystemInfo>();
-            // PrintFolderInfo("/Users/sanzhar/Downloads/");    
-            
-            // fileSystemInfo.AddRange(history.Peek().dir.GetDirectories());
-            // fileSystemInfo.AddRange(history.Peek().dir.GetFiles());
             
             while (!escape)
             {
                 Console.Clear();
-                // PrintFolderInfo(history.Peek().dir.FullName, pos);
-                history.Peek().PrintInfo();
-                ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
-                switch (consoleKeyInfo.Key)
+                try
+                {         
+                    history.Peek().PrintInfo();
+                    ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
+                    switch (consoleKeyInfo.Key)
+                    {
+                        case ConsoleKey.Enter:
+                            Console.BackgroundColor = ConsoleColor.DarkBlue;                            
+                            if (history.Peek().GetCurrentObjet() is DirectoryInfo)
+                            {
+                                history.Push(new Layer(history.Peek().GetCurrentObjet()
+                                    as DirectoryInfo, 0));
+                            }
+                            else
+                            {
+                                history.Peek().OpenFile();
+                            }
+                            break;
+                        case ConsoleKey.UpArrow:
+                            Console.BackgroundColor = ConsoleColor.DarkBlue;
+                            history.Peek().SetNewPosition(-1);
+                            break;
+                        case ConsoleKey.DownArrow:
+                            Console.BackgroundColor = ConsoleColor.DarkBlue;
+                            history.Peek().SetNewPosition(1);
+                            break;
+                        case ConsoleKey.D:
+                            history.Peek().Delete();
+                            break;
+                        case ConsoleKey.O:
+                            history.Peek().OpenFile();
+                            break;
+                        case ConsoleKey.Tab:
+                            history.Peek().Rename();
+                            history.Push(new Layer(new DirectoryInfo
+                                (""), 0));
+                            break;
+                        case ConsoleKey.Backspace:
+                            Console.BackgroundColor = ConsoleColor.DarkBlue;
+                            history.Pop();
+                            break;
+                        case ConsoleKey.W:
+                            history.Peek().Write();
+                            break;
+                        case ConsoleKey.A:
+                            history.Peek().Append();
+                            break;                   
+                        case ConsoleKey.Escape:
+                            escape = true;
+                            Console.BackgroundColor = ConsoleColor.DarkBlue;
+                            Console.Clear();
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Console.WriteLine("Good Bye!");
+                            break;
+                    }
+                } 
+                catch (Exception)
                 {
-                    case ConsoleKey.Enter:
-                        if (history.Peek().GetCurrentObjet() is DirectoryInfo)
-                        {
-                            history.Push(new Layer(history.Peek().GetCurrentObjet() 
-                                as DirectoryInfo, 0));
-                        }
-                        break;
-                    case ConsoleKey.UpArrow:
-                        history.Peek().SetNewPosition(-1);
-                        break;
-                    case ConsoleKey.DownArrow:
-                        history.Peek().SetNewPosition(1);
-                        break;
-                    case ConsoleKey.Escape:
-                        escape = true;
-                        break;
+                    Console.BackgroundColor = ConsoleColor.DarkBlue;
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("ERROR");
+                    break;
                 }
-                // if (consoleKeyInfo.Key == ConsoleKey.Escape) break;
-                // Console.WriteLine(consoleKeyInfo.KeyChar);    
             }
         }
-
-        private static void F2()
-        {
-            while (true)
-            {
-                ConsoleKeyInfo consoleKeyInfo = Console.ReadKey();
-                if (consoleKeyInfo.Key == ConsoleKey.Escape) break;
-                Console.WriteLine(consoleKeyInfo.KeyChar);    
-            }
-        }
-
-        private static void F1()
-        {
-            ConsoleKeyInfo consoleKeyInfo = Console.ReadKey();
-            Console.WriteLine(consoleKeyInfo);
-        }
-        
     }
 }
