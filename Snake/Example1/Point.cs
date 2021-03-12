@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Example1
+﻿namespace Example1
 {
-    class Point
+    public class Point
     {
         int x;
         int y;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Example1
 {
@@ -13,23 +12,17 @@ namespace Example1
             body.Add(location);
             Draw();
         }
-/*        public void Generate()
-        {
-            body[0].X = random.Next(1, 39);
-            body[0].Y = random.Next(1, 39);
-            Draw();
-        }*/
 
         public void GenerateLocation(List<Point> wormBody, List<Point> wallBody)
         {
             body.Clear();
             Random random = new Random();
 
-            Point p = new Point { X = random.Next(0, 39), Y = random.Next(0, 39) };
+            Point p = new Point { X = random.Next(1, 38), Y = random.Next(1, 38) };
 
             while (!IsAvailablePoint(p, wormBody) || !IsAvailablePoint(p, wallBody))
             {
-                p = new Point { X = random.Next(0, 39), Y = random.Next(0, 39) };
+                p = new Point { X = random.Next(1, 38), Y = random.Next(1, 38) };
             }
             body.Add(p);
             Draw();

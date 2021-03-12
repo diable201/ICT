@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Xml.Serialization;
 
 namespace Example1
 {
-    class Wall : GameObject
+    public class Wall : GameObject
     {
         enum GameLevel
         {
@@ -13,6 +13,12 @@ namespace Example1
             SECOND
         }
         GameLevel gameLevel = GameLevel.FIRST;
+
+        public Wall() : base()
+        {
+
+        }
+
         public Wall(char sign, ConsoleColor color) : base(sign, color)
         {
             body = new List<Point>();
@@ -23,7 +29,9 @@ namespace Example1
             body = new List<Point>();
             string levelName = @"Levels/Level1.txt";
             if (gameLevel == GameLevel.SECOND)
+            {
                 levelName = @"Levels/Level2.txt";
+            }  
             using (FileStream fs = new FileStream(levelName, FileMode.Open, FileAccess.Read))
             {
                 using StreamReader reader = new StreamReader(fs);
@@ -47,12 +55,31 @@ namespace Example1
         }
         public void NextLevel()
         {
-
+            
             if (gameLevel == GameLevel.FIRST)
             {
                 gameLevel = GameLevel.SECOND;
             }
             LoadLevel();
+        }
+
+        public void Save(string title)
+        {
+            if (File.Exists("wall.xml"))
+            {
+                File.Delete("wall.xml");
+            }
+            using FileStream fs = new FileStream(title + ".xml", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Wall));
+            xmlSerializer.Serialize(fs, this);
+        }
+
+        public static Wall Load(string title)
+        {
+            using FileStream fs = new FileStream(title + ".xml", FileMode.Open, FileAccess.Read);
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Wall));
+            Wall save = xmlSerializer.Deserialize(fs) as Wall;
+            return save;
         }
     }
 }

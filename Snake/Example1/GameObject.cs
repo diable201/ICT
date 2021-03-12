@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Example1
 {
-    abstract class GameObject
+    public abstract class GameObject
     {
-        protected char sign;
-        protected ConsoleColor color;
+        public char sign;
+        public ConsoleColor color;
         public List<Point> body;
+
+        public GameObject()
+        {
+
+        }
+
         public GameObject(char sign, ConsoleColor color)
         {
             this.sign = sign;
@@ -26,7 +31,7 @@ namespace Example1
             }
         }
 
-        protected void Clear()
+        public void Clear()
         {
             for (int i = 0; i < body.Count; i++)
             {
