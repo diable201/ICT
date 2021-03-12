@@ -94,6 +94,55 @@ namespace FileManager
             }
         }
 
+        public void CreateFolder()
+        {
+            string path = "";
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("Write new name for folder: ");
+            string name = Console.ReadLine();
+            string folder = Path.Combine(path, name);
+            Directory.CreateDirectory(folder);
+        }
+
+        public void CreateFile()
+        {
+            string path = "";
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("Write new name for file: ");
+            string filename = Console.ReadLine();
+            string file = Path.Combine(path, filename);
+            File.Create(file).Dispose();
+        }
+
+        public void GetSize()
+        {
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.White;
+            FileInfo fi = new FileInfo(Content[Pos].FullName);
+            long size = fi.Length;
+            Console.WriteLine("File Size in Bytes: {0}", size);
+        }
+
+        public long DirSize(DirectoryInfo d)
+        {
+            long size = 0;            
+            FileInfo[] fis = d.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                size += fi.Length;
+            }           
+            DirectoryInfo[] dis = d.GetDirectories();
+            foreach (DirectoryInfo di in dis)
+            {
+                size += DirSize(di);
+            }
+            return size;
+        }
 
         public void PrintInfo()
         {
@@ -102,25 +151,29 @@ namespace FileManager
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Welcome To File Manager!");
-            Console.WriteLine("Open: Enter or O for files | Rename: TAB | Delete: D | Write: W | Append: A | Back: BackSpace | Close: ESC");
+            Console.WriteLine("Open: Enter | Rename: TAB | Delete: D | Write: W | Append: A | Back: BackSpace | Close: ESC");
+            Console.WriteLine("Create File: Y | Create Folder: T");
             int fCount = Directory.GetFiles(path, "*", SearchOption.AllDirectories).Length;
             int dCount = Directory.GetDirectories(path, "*", SearchOption.AllDirectories).Length;
             Console.WriteLine("Date: " + DateTime.Now);
             Console.WriteLine("Number of Files " + fCount);
             Console.WriteLine("Number of Directories " + dCount);
             Console.WriteLine("List of files:\n");
+           
             int cnt = 0;
+            
             foreach (DirectoryInfo d in Dir.GetDirectories())
             {
                 if (cnt == Pos)
                 {
                     Console.BackgroundColor = ConsoleColor.Red;
+                    Console.WriteLine(d.Name + " Size: " + DirSize(d) + " Bytes");
                 }
                 else
                 {
                     Console.BackgroundColor = ConsoleColor.DarkBlue;
-                }
-                Console.WriteLine(d.Name);
+                    Console.WriteLine(d.Name);
+                }              
                 cnt++;
             }
             Console.ForegroundColor = ConsoleColor.White;
@@ -129,12 +182,14 @@ namespace FileManager
                 if (cnt == Pos)
                 {
                     Console.BackgroundColor = ConsoleColor.Red;
+                    Console.WriteLine(f.Name + " Size: " + f.Length + " Bytes");
                 }
                 else
                 {
                     Console.BackgroundColor = ConsoleColor.DarkBlue;
+                    Console.WriteLine(f.Name);
                 }
-                Console.WriteLine(f.Name);
+                
                 cnt++;
             }
         }
@@ -187,6 +242,7 @@ namespace FileManager
                 try
                 {         
                     history.Peek().PrintInfo();
+                    
                     ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
                     switch (consoleKeyInfo.Key)
                     {
@@ -195,7 +251,7 @@ namespace FileManager
                             if (history.Peek().GetCurrentObjet() is DirectoryInfo)
                             {
                                 history.Push(new Layer(history.Peek().GetCurrentObjet()
-                                    as DirectoryInfo, 0));
+                                    as DirectoryInfo, 0));                              
                             }
                             else
                             {
@@ -213,9 +269,6 @@ namespace FileManager
                         case ConsoleKey.D:
                             history.Peek().Delete();
                             break;
-                        case ConsoleKey.O:
-                            history.Peek().OpenFile();
-                            break;
                         case ConsoleKey.Tab:
                             history.Peek().Rename();
                             history.Push(new Layer(new DirectoryInfo
@@ -230,7 +283,17 @@ namespace FileManager
                             break;
                         case ConsoleKey.A:
                             history.Peek().Append();
-                            break;                   
+                            break;                       
+                        case ConsoleKey.T:
+                            history.Peek().CreateFolder();
+                            history.Push(new Layer(new DirectoryInfo
+                                (""), 0));
+                            break;
+                        case ConsoleKey.Y:
+                            history.Peek().CreateFile();
+                            history.Push(new Layer(new DirectoryInfo
+                                (""), 0));
+                            break;
                         case ConsoleKey.Escape:
                             escape = true;
                             Console.BackgroundColor = ConsoleColor.DarkBlue;
