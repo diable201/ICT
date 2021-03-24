@@ -6,23 +6,23 @@ namespace Example1
 {
     public abstract class GameObject
     {
-        private readonly char _sign;
-        private readonly ConsoleColor _color;
+        public char _sign;
+        public ConsoleColor _color;
         public List<Point> Body;
 
-        protected GameObject()
+        public GameObject()
         {
 
         }
 
-        protected GameObject(char sign, ConsoleColor color)
+        public GameObject(char sign, ConsoleColor color)
         {
             this._sign = sign;
             this._color = color;
             this.Body = new List<Point>();
         }
 
-        protected void Draw()
+        public void Draw()
         {
             Console.ForegroundColor = _color;
             foreach (var t in Body)

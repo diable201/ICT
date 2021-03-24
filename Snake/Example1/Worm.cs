@@ -7,8 +7,8 @@ namespace Example1
 {
     public class Worm : GameObject
     {
-        private int Dx { get; set; }
-        private int Dy { get; set; }
+        public int Dx { get; set; }
+        public int Dy { get; set; }
 
         public Worm() : base()
         {
@@ -50,9 +50,9 @@ namespace Example1
             CountOfPoints++;
         }
 
-        private int LengthOfWorm { get; set; }
+        public int LengthOfWorm { get; set; }
 
-        public int CountOfPoints { get; private set; }
+        public int CountOfPoints { get; set; }
 
         public void Save(string title)
         {
