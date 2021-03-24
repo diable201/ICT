@@ -1,28 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace FileManager
 {
     internal class Layer
     {
-        public DirectoryInfo Dir
-        {
-            get;
-            set;
-        }
+        private DirectoryInfo Dir { get; }
 
-        public int Pos
-        {
-            get;
-            set;
-        }
+        private int Pos { get; set; }
 
-        public List<FileSystemInfo> Content
-        {
-            get;
-            set;
-        }
+        private List<FileSystemInfo> Content { get; }
 
         public Layer(DirectoryInfo dir, int pos)
         {
@@ -39,7 +28,7 @@ namespace FileManager
             Console.BackgroundColor = ConsoleColor.DarkBlue;
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
-            string txt = File.ReadAllText(Content[Pos].FullName);
+            var txt = File.ReadAllText(Content[Pos].FullName);
             Console.WriteLine(txt);
             Console.ReadKey();
         }
@@ -50,7 +39,7 @@ namespace FileManager
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
             Content[Pos].Delete();
-            Console.WriteLine("Succesfully deleted!");
+            Console.WriteLine("Successfully deleted!");
             Console.ReadKey();
         }
 
@@ -60,7 +49,7 @@ namespace FileManager
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Input: ");
-            string text = Console.ReadLine();
+            var text = Console.ReadLine();
             using StreamWriter sw = new StreamWriter(Content[Pos].FullName);
             sw.WriteLine(text);
         }
@@ -71,19 +60,21 @@ namespace FileManager
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Append: ");
-            string text = Console.ReadLine();
-            using StreamWriter sw= File.AppendText(Content[Pos].FullName);
+            var text = Console.ReadLine();
+            using StreamWriter sw = File.AppendText(Content[Pos].FullName);
             sw.WriteLine(text);
         }
 
-        public void Rename() 
+        public void Rename()
         {
-            string parent = new DirectoryInfo(Content[Pos].FullName).Parent.FullName;
+            var directoryInfo = new DirectoryInfo(Content[Pos].FullName).Parent;
+            if (directoryInfo == null) return;
+            var parent = directoryInfo.FullName;
             Console.BackgroundColor = ConsoleColor.DarkBlue;
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write("Write new name: ");
-            string name = Console.ReadLine();
+            var name = Console.ReadLine();
             if (Content[Pos] is DirectoryInfo)
             {
                 Directory.Move(Content[Pos].FullName, parent + '/' + name);
@@ -94,27 +85,27 @@ namespace FileManager
             }
         }
 
-        public void CreateFolder()
+        public static void CreateFolder()
         {
-            string path = "";
+            const string path = "";
             Console.BackgroundColor = ConsoleColor.DarkBlue;
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write("Write new name for folder: ");
-            string name = Console.ReadLine();
-            string folder = Path.Combine(path, name);
+            var name = Console.ReadLine();
+            var folder = Path.Combine(path, name ?? string.Empty);
             Directory.CreateDirectory(folder);
         }
 
-        public void CreateFile()
+        public static void CreateFile()
         {
-            string path = "";
+            const string path = "";
             Console.BackgroundColor = ConsoleColor.DarkBlue;
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write("Write new name for file: ");
-            string filename = Console.ReadLine();
-            string file = Path.Combine(path, filename);
+            var filename = Console.ReadLine();
+            var file = Path.Combine(path, filename ?? string.Empty);
             File.Create(file).Dispose();
         }
 
@@ -124,43 +115,36 @@ namespace FileManager
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
             FileInfo fi = new FileInfo(Content[Pos].FullName);
-            long size = fi.Length;
+            var size = fi.Length;
             Console.WriteLine("File Size in Bytes: {0}", size);
         }
 
-        public long DirSize(DirectoryInfo d)
+        private static long DirSize(DirectoryInfo d)
         {
-            long size = 0;            
             FileInfo[] fis = d.GetFiles();
-            foreach (FileInfo fi in fis)
-            {
-                size += fi.Length;
-            }           
+            var size = fis.Sum(fi => fi.Length);
             DirectoryInfo[] dis = d.GetDirectories();
-            foreach (DirectoryInfo di in dis)
-            {
-                size += DirSize(di);
-            }
+            size += dis.Sum(DirSize);
             return size;
         }
 
         public void PrintInfo()
         {
-            string path = "";
+            const string path = "";
             Console.BackgroundColor = ConsoleColor.DarkBlue;
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Welcome To File Manager!");
             Console.WriteLine("Open: Enter | Rename: TAB | Delete: D | Write: W | Append: A | Back: BackSpace | Close: ESC");
             Console.WriteLine("Create File: Y | Create Folder: T");
-            int fCount = Directory.GetFiles(path, "*", SearchOption.AllDirectories).Length;
-            int dCount = Directory.GetDirectories(path, "*", SearchOption.AllDirectories).Length;
+            var fCount = Directory.GetFiles(path, "*", SearchOption.AllDirectories).Length;
+            var dCount = Directory.GetDirectories(path, "*", SearchOption.AllDirectories).Length;
             Console.WriteLine("Date: " + DateTime.Now);
             Console.WriteLine("Number of Files " + fCount);
             Console.WriteLine("Number of Directories " + dCount);
             Console.WriteLine("List of files:\n");
            
-            int cnt = 0;
+            var cnt = 0;
             
             foreach (DirectoryInfo d in Dir.GetDirectories())
             {
@@ -223,7 +207,7 @@ namespace FileManager
 
     internal static class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             ManagerStart();
         }
@@ -234,7 +218,7 @@ namespace FileManager
             history.Push(new Layer(new DirectoryInfo
                 (""), 0));
             Console.CursorVisible = false;
-            bool escape = false;
+            var escape = false;
             
             while (!escape)
             {
@@ -242,7 +226,6 @@ namespace FileManager
                 try
                 {         
                     history.Peek().PrintInfo();
-                    
                     ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
                     switch (consoleKeyInfo.Key)
                     {
@@ -285,12 +268,12 @@ namespace FileManager
                             history.Peek().Append();
                             break;                       
                         case ConsoleKey.T:
-                            history.Peek().CreateFolder();
+                            Layer.CreateFolder();
                             history.Push(new Layer(new DirectoryInfo
                                 (""), 0));
                             break;
                         case ConsoleKey.Y:
-                            history.Peek().CreateFile();
+                            Layer.CreateFile();
                             history.Push(new Layer(new DirectoryInfo
                                 (""), 0));
                             break;
@@ -307,11 +290,12 @@ namespace FileManager
                 {
                     Console.BackgroundColor = ConsoleColor.DarkBlue;
                     Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine("ERROR");
-                    break;
+                    Console.ForegroundColor = ConsoleColor.White;                    
+                    history.Push(new Layer(new DirectoryInfo
+                        (""), 0));
                 }
             }
         }
     }
 }
+
