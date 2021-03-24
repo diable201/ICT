@@ -7,12 +7,13 @@ namespace Example1
 {
     public class Wall : GameObject
     {
-        enum GameLevel
+        private enum GameLevel
         {
-            FIRST,
-            SECOND
+            First,
+            Second
         }
-        GameLevel gameLevel = GameLevel.FIRST;
+
+        private GameLevel _gameLevel = GameLevel.First;
 
         public Wall() : base()
         {
@@ -21,44 +22,43 @@ namespace Example1
 
         public Wall(char sign, ConsoleColor color) : base(sign, color)
         {
-            body = new List<Point>();
+            Body = new List<Point>();
         }
 
         public void LoadLevel()
         {
-            body = new List<Point>();
-            string levelName = @"Levels/Level1.txt";
-            if (gameLevel == GameLevel.SECOND)
+            Body = new List<Point>();
+            var levelName = @"Levels/Level1.txt";
+            if (_gameLevel == GameLevel.Second)
             {
                 levelName = @"Levels/Level2.txt";
             }  
             using (FileStream fs = new FileStream(levelName, FileMode.Open, FileAccess.Read))
-            {
+            {            
                 using StreamReader reader = new StreamReader(fs);
-                int rowNumber = 0;
+                var rowNumber = 0;
                 while (!reader.EndOfStream)
                 {
-                    string line = reader.ReadLine();
+                    var line = reader.ReadLine();
 
-                    for (int columnNumber = 0; columnNumber < line.Length; columnNumber++)
+                    for (var columnNumber = 0; columnNumber < line.Length; columnNumber++)
                     {
                         if (line[columnNumber] == '#')
                         {
-                            body.Add(new Point { X = columnNumber, Y = rowNumber });
+                            Body.Add(new Point { X = columnNumber, Y = rowNumber });
                         }
                     }
                     rowNumber++;
                 }
-
             }
             Draw();
         }
         public void NextLevel()
         {
             
-            if (gameLevel == GameLevel.FIRST)
+            if (_gameLevel == GameLevel.First)
             {
-                gameLevel = GameLevel.SECOND;
+                _gameLevel = GameLevel.Second;
             }
             LoadLevel();
         }
@@ -83,3 +83,4 @@ namespace Example1
         }
     }
 }
+

@@ -2,10 +2,9 @@
 
 namespace Example1
 {
-    class Program
+    internal static class Program
     {
-        
-        static void Main(string[] args)
+        private static void Main()
         {
             Console.Clear();
             Console.CursorVisible = false;
@@ -28,25 +27,29 @@ namespace Example1
             Console.WriteLine("E: Exit");
             Console.SetCursorPosition(13, 25);
             Console.Write("Select an option: ");
-            string input = Console.ReadLine();
-            string choice = input.ToUpper();
-            if (choice == "N")
+            var input = Console.ReadLine();
+            if (input == null) return;
+            var choice = input.ToUpper();
+            switch (choice)
             {
-                Console.Clear();
-                Game game = new Game();
-                while (game.IsRunning)
+                case "N":
                 {
-                    
-                    game.KeyPressed(Console.ReadKey(true));
+                    Console.Clear();
+                    var game = new Game();
+                    while (game.IsRunning)
+                    {
+                        game.KeyPressed(Console.ReadKey(true));
+                    }
 
+                    break;
                 }
-            }
-            else if (choice == "E")
-            {
-                Console.Clear();
-                Console.SetCursorPosition(15, 20);
-                Console.WriteLine("Good Bye");
+                case "E":
+                    Console.Clear();
+                    Console.SetCursorPosition(15, 20);
+                    Console.WriteLine("Good Bye");
+                    break;
             }
         }
     }
 }
+

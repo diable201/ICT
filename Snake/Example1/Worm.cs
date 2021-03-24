@@ -7,11 +7,8 @@ namespace Example1
 {
     public class Worm : GameObject
     {
-        public int lengthOfWorm;
-        public int pointsOfWorm;
-
-        public int Dx { get; set; }
-        public int Dy { get; set; }
+        private int Dx { get; set; }
+        private int Dy { get; set; }
 
         public Worm() : base()
         {
@@ -20,12 +17,11 @@ namespace Example1
 
         public Worm(char sign, ConsoleColor color) : base(sign, color)
         {
-            Point head = new Point { X = 20, Y = 20 };
-            body = new List<Point>();
-            body.Add(head);
+            var head = new Point { X = 20, Y = 20 };
+            Body = new List<Point> {head};
             Draw();
-            lengthOfWorm = 1;
-            pointsOfWorm = 0;
+            LengthOfWorm = 1;
+            CountOfPoints = 0;
         }
 
         public void ChangeDirection(int dx, int dy)
@@ -37,39 +33,26 @@ namespace Example1
         public void Move()
         {
             Clear();
-            for (int i = body.Count - 1; i > 0; i--)
+            for (var i = Body.Count - 1; i > 0; i--)
             {
-                body[i].X = body[i - 1].X;
-                body[i].Y = body[i - 1].Y;
+                Body[i].X = Body[i - 1].X;
+                Body[i].Y = Body[i - 1].Y;
             }
-
-            body[0].X += Dx;
-            body[0].Y += Dy;
+            Body[0].X += Dx;
+            Body[0].Y += Dy;
             Draw();
         }
 
         public void Increase(Point point)
         {
-            body.Add(new Point { X = point.X, Y = point.Y });
-            lengthOfWorm++;
-            pointsOfWorm++;
+            Body.Add(new Point { X = point.X, Y = point.Y });
+            LengthOfWorm++;
+            CountOfPoints++;
         }
 
-        public int LengthOfWorm
-        {
-            get
-            {
-                return lengthOfWorm;
-            }
-        }
+        private int LengthOfWorm { get; set; }
 
-        public int CountOfPoints
-        {
-            get
-            {
-                return pointsOfWorm;
-            }
-        }
+        public int CountOfPoints { get; private set; }
 
         public void Save(string title)
         {
@@ -91,3 +74,4 @@ namespace Example1
         }
     }
 }
+

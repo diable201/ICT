@@ -3,30 +3,27 @@ using System.Timers;
 
 namespace Example1
 {
-    class Game
+    internal class Game
     {
         public static int Width { get { return 40; } }
         public static int Height { get { return 40; } }
 
-        Worm worm = new Worm('*', ConsoleColor.Green);
-        Wall wall = new Wall('#', ConsoleColor.Blue);
-        Food food = new Food('$', ConsoleColor.Red);
-        Timer wormTimer = new Timer(150);
-        Timer wallTimer = new Timer(150);
-        Timer gameTimer = new Timer(1000);
-        bool pause;
-        public bool IsRunning { get; set; }
-
-       
+        private Worm _worm = new Worm('*', ConsoleColor.Green);
+        private Wall _wall = new Wall('#', ConsoleColor.Blue);
+        private Food _food = new Food('$', ConsoleColor.Red);
+        private readonly Timer _wormTimer = new Timer(115);
+        private readonly Timer _gameTimer = new Timer(300);
+        private bool _pause;
+        public bool IsRunning { get; private set; }
+        
         public Game()
         {
-            wormTimer.Elapsed += MoveWorm;
-            wormTimer.Start();
-            gameTimer.Elapsed += GameTimerElapsed;
-            gameTimer.Start();           
-            wallTimer.Start();
-            wall.LoadLevel();
-            pause = false;
+            _wormTimer.Elapsed += MoveWorm;
+            _wormTimer.Start();
+            _gameTimer.Elapsed += GameTimerElapsed;
+            _gameTimer.Start();           
+            _wall.LoadLevel();
+            _pause = false;
             IsRunning = true;
             Console.CursorVisible = false;
             Console.SetWindowSize(Width, Width);
@@ -35,45 +32,43 @@ namespace Example1
 
         private void GameTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            Console.Title = DateTime.Now.ToLongTimeString() + " Scores: " + worm.CountOfPoints;
-            //Console.Title = ("Eatten Food: " + worm.CountOfPoints);
+            Console.Title = DateTime.Now.ToLongTimeString() + " Scores: " + _worm.CountOfPoints;
         }
 
         public void UpdatePoints(object sender, ElapsedEventArgs e)
         {    
             Console.SetCursorPosition(25, 1);
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("Eatten Food: {0}", worm.CountOfPoints, Console.ForegroundColor);
+            Console.Write("Eaten Food: {0}", _worm.CountOfPoints, Console.ForegroundColor);
         }
 
-        void MoveWorm(object sender, ElapsedEventArgs e)
+        private void MoveWorm(object sender, ElapsedEventArgs e)
         {
-            worm.Move();
+            _worm.Move();
 
-            if (worm.IsIntersected(wall.body))
+            if (_worm.IsIntersected(_wall.Body))
             {
                 Console.Clear();
                 Console.SetCursorPosition(15, 20);
                 Console.Write("Game over ;(");
                 Console.SetCursorPosition(14, 23);
-                Console.Write("Your Scores: {0}", worm.CountOfPoints);
+                Console.Write("Your Scores: {0}", _worm.CountOfPoints);
                 Console.SetCursorPosition(10, 26);
                 Console.Write("Load Saved Game? Press L");
-                wormTimer.Stop();
-                pause = true;
+                _wormTimer.Stop();
+                _pause = true;
             }
 
-            if (worm.IsIntersected(food.body))
+            if (_worm.IsIntersected(_food.Body))
             {
-                worm.Increase(worm.body[0]);
-                food.GenerateLocation(worm.body, wall.body);
+                _worm.Increase(_worm.Body[0]);
+                _food.GenerateLocation(_worm.Body, _wall.Body);
             }
 
-            if (worm.LengthOfWorm == 4)
+            if (_worm.CountOfPoints == 3)
             {
-                //food.Clear();
-                //food = new Food('$', ConsoleColor.Yellow);
-                wall.NextLevel();
+                _wall.Clear();
+                _wall.NextLevel();
             }
         }
 
@@ -83,58 +78,60 @@ namespace Example1
             switch (pressedKey.Key)
             {
                 case ConsoleKey.UpArrow:
-                    worm.ChangeDirection(0, -1);
+                    _worm.ChangeDirection(0, -1);
                     break;
                 case ConsoleKey.DownArrow:
-                    worm.ChangeDirection(0, 1);
+                    _worm.ChangeDirection(0, 1);
                     break;
                 case ConsoleKey.LeftArrow:
-                    worm.ChangeDirection(-1, 0);
+                    _worm.ChangeDirection(-1, 0);
                     break;
                 case ConsoleKey.RightArrow:
-                    worm.ChangeDirection(1, 0);
+                    _worm.ChangeDirection(1, 0);
                     break;
                 case ConsoleKey.S:
-                    worm.Save("save");
-                    wall.Save("wall");
+                    _worm.Save("save");
+                    _wall.Save("wall");                  
                     break;
                 case ConsoleKey.L:
                     Console.Clear();
-                    wormTimer.Stop();
-                    wallTimer.Stop();
-                    wall.Clear();
-                    worm.Clear();
-                    food.Clear();
-                    food = new Food('$', ConsoleColor.Red);
-                    worm = Worm.Load("save");
-                    wall = Wall.Load("wall");
-                    if (worm.CountOfPoints >= 3)
+                    _wormTimer.Stop();                   
+                    _wall.Clear();
+                    _worm.Clear();
+                    _food.Clear();
+                    _wall = Wall.Load("wall");
+                    _worm = Worm.Load("save");                 
+                    _food = new Food('$', ConsoleColor.Red);
+                    if (_worm.CountOfPoints >= 3)
                     {
-                        wall.NextLevel();
-                    }            
+                        _wall.NextLevel();
+                    }
                     else
                     {
-                        wall.LoadLevel();
+                        _wall.LoadLevel();
                     }
-                    wormTimer.Start();
-                    wallTimer.Start();
+                    _wormTimer.Start();
                     break;
                 case ConsoleKey.Spacebar:
-                    if (!pause)
+                    if (!_pause)
                     {
-                        wormTimer.Stop();
-                        pause = true;
+                        _wormTimer.Stop();
+                        _pause = true;
                     }
                     else
                     {
-                        wormTimer.Start();
-                        pause = false;
+                        _wormTimer.Start();
+                        _pause = false;
                     }
                     break;
                 case ConsoleKey.Escape:
+                    Console.Clear();
+                    Console.SetCursorPosition(15, 20);
+                    Console.WriteLine("Good Bye");
                     IsRunning = false;
                     break;
             }           
         }
     }
 }
+

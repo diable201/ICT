@@ -1,57 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Example1
 {
     public abstract class GameObject
     {
-        public char sign;
-        public ConsoleColor color;
-        public List<Point> body;
+        private readonly char _sign;
+        private readonly ConsoleColor _color;
+        public List<Point> Body;
 
-        public GameObject()
+        protected GameObject()
         {
 
         }
 
-        public GameObject(char sign, ConsoleColor color)
+        protected GameObject(char sign, ConsoleColor color)
         {
-            this.sign = sign;
-            this.color = color;
-            this.body = new List<Point>();
+            this._sign = sign;
+            this._color = color;
+            this.Body = new List<Point>();
         }
 
         protected void Draw()
         {
-            Console.ForegroundColor = color;
-            for (int i = 0; i < body.Count; i++)
+            Console.ForegroundColor = _color;
+            foreach (var t in Body)
             {
-                Console.SetCursorPosition(body[i].X, body[i].Y);
-                Console.Write(sign);
+                Console.SetCursorPosition(t.X, t.Y);
+                Console.Write(_sign);
             }
         }
 
         public void Clear()
         {
-            for (int i = 0; i < body.Count; i++)
+            foreach (var t in Body)
             {
-                Console.SetCursorPosition(body[i].X, body[i].Y);
-                Console.Write(' ');
+                Console.SetCursorPosition(t.X, t.Y);
+                Console.Write(" ");
             }
         }
 
-        public bool IsIntersected(List<Point> points)
+        public bool IsIntersected(IEnumerable<Point> points)
         {
-            bool res = false;
-            foreach (Point p in points)
-            {
-                if (p.X == body[0].X && p.Y == body[0].Y)
-                {
-                    res = true;
-                    break;
-                }
-            }
-            return res;
+            return points.Any(p => p.X == Body[0].X && p.Y == Body[0].Y);
         }
     }
 }
+
