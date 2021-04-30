@@ -32,5 +32,10 @@ namespace Example2
             Button btn = sender as Button;
             brain.ProcessSignal(btn.Text);
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

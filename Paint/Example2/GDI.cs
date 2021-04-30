@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Example2
 {
-    public class GDI
+    class GDI
     {
         public IntPtr CreateSolidBRUSH(uint color)
         {
@@ -56,6 +52,7 @@ namespace Example2
     {
         public MapFill()
         {
+
         }
         /// <summary>
         /// Заливка области

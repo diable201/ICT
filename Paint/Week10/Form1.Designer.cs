@@ -77,6 +77,7 @@ namespace Week10
             this.Controls.Add(this.button1);
             this.Name = "Form1";
             this.Text = "s";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.Scroll += new System.Windows.Forms.ScrollEventHandler(this.numericUpDown1_Scroll);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseClick);
