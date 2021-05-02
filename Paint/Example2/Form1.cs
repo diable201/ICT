@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Example2
 {
-    enum Tool
+    internal enum Tool
     {
         Line,
         Rectangle,
@@ -24,24 +24,22 @@ namespace Example2
     }
     public partial class Form1 : Form
     {
-        Bitmap bitmap = default(Bitmap);
-        Graphics graphics = default(Graphics);
-        Pen pen = new Pen(Color.Black, 1);
-        Point prevPoint = default(Point);
-        Point currentPoint = default(Point);
-        bool isMousePressed = false;
-        Tool currentTool = Tool.Pen;
+        private Bitmap _bitmap = default(Bitmap);
+        private Graphics _graphics = default(Graphics);
+        private Pen _pen = new Pen(Color.Black, 1);
+        private Point _prevPoint = default(Point);
+        private Point _currentPoint = default(Point);
+        private bool _isMousePressed = false;
+        private Tool _currentTool = Tool.Pen;
         public Form1()
         {
             InitializeComponent();
-            bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            graphics = Graphics.FromImage(bitmap);
-            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            _bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            _graphics = Graphics.FromImage(_bitmap);
+            _graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             //graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-            
-            
-            pictureBox1.Image = bitmap;
-            graphics.Clear(Color.White);
+            pictureBox1.Image = _bitmap;
+            _graphics.Clear(Color.White);
             openToolStripMenuItem.Click += OpenToolStripMenuItem_Click;
             saveToolStripMenuItem.Click += SaveToolStripMenuItem_Click;
             button3.Select();
@@ -70,21 +68,19 @@ namespace Example2
                 switch (saveFileDialog1.FilterIndex)
                 {
                     case 1:
-                        bitmap.Save(fs,
+                        _bitmap.Save(fs,
                           System.Drawing.Imaging.ImageFormat.Jpeg);
                         break;
-
                     case 2:
-                        bitmap.Save(fs,
+                        _bitmap.Save(fs,
                           System.Drawing.Imaging.ImageFormat.Bmp);
                         break;
-
                     case 3:
-                        bitmap.Save(fs,
+                        _bitmap.Save(fs,
                           System.Drawing.Imaging.ImageFormat.Gif);
                         break;
                     case 4:
-                        bitmap.Save(fs,
+                        _bitmap.Save(fs,
                             System.Drawing.Imaging.ImageFormat.Png);
                         break;
                 }
@@ -96,9 +92,9 @@ namespace Example2
         {
            if (openFileDialog1.ShowDialog() == DialogResult.OK)
            {
-                bitmap = Bitmap.FromFile(openFileDialog1.FileName) as Bitmap;
-                pictureBox1.Image = bitmap;
-                graphics = Graphics.FromImage(bitmap);
+                _bitmap = Bitmap.FromFile(openFileDialog1.FileName) as Bitmap;
+                pictureBox1.Image = _bitmap;
+                _graphics = Graphics.FromImage(_bitmap);
            }
         }
 
@@ -109,11 +105,11 @@ namespace Example2
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            currentTool = Tool.Line;
+            _currentTool = Tool.Line;
         }
 
 
-        Rectangle GetMRectangle(Point pPoint, Point cPoint)
+        private Rectangle GetMRectangle(Point pPoint, Point cPoint)
         {
             return new Rectangle
             {
@@ -126,16 +122,16 @@ namespace Example2
 
         private void button9_Click(object sender, EventArgs e)
         {
-            currentTool = Tool.Pallete;
+            _currentTool = Tool.Pallete;
         }
 
         private Color GetColorAt(Point point)
         {
-            Color pixelColor = bitmap.GetPixel(point.X, point.Y);
+            Color pixelColor = _bitmap.GetPixel(point.X, point.Y);
             return pixelColor;
         }
 
-        Point[] Triangle(Point fPoint, Point sPoint)
+        private Point[] Triangle(Point fPoint, Point sPoint)
         {
             Point mid = new Point
             {
@@ -149,30 +145,32 @@ namespace Example2
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
             toolStripStatusLabel1.Text = e.Location.ToString();
-            if (isMousePressed)
+            if (_isMousePressed)
             {
-                switch (currentTool)
+                switch (_currentTool)
                 {
                     case Tool.Line:
-                        currentPoint = e.Location;
+                        _currentPoint = e.Location;
                         break;
                     case Tool.Rectangle:
-                        currentPoint = e.Location;
+                        _currentPoint = e.Location;
                         break;
                     case Tool.Ellipse:
-                        currentPoint = e.Location;
+                        _currentPoint = e.Location;
                         break;
                     case Tool.Pen:
-                        prevPoint = currentPoint;
-                        currentPoint = e.Location;
-                        graphics.DrawLine(pen, prevPoint, currentPoint);
+                        _prevPoint = _currentPoint;
+                        _currentPoint = e.Location;
+                        _graphics.DrawLine(_pen, _prevPoint, _currentPoint);
                         break;
                     case Tool.Triangle:
-                        currentPoint = e.Location;
+                        _currentPoint = e.Location;
                         break;
                     case Tool.Eraser:                       
-                        currentPoint = e.Location;
-                        graphics.FillRectangle(new SolidBrush(Color.White), GetMRectangle(new Point(currentPoint.X - 10, currentPoint.Y - 10), new Point(currentPoint.X + 10, currentPoint.Y + 10)));
+                        _currentPoint = e.Location;
+                        _graphics.FillRectangle(new SolidBrush(Color.White), 
+                            GetMRectangle(new Point(_currentPoint.X - 10, _currentPoint.Y - 10), 
+                            new Point(_currentPoint.X + 10, _currentPoint.Y + 10)));
                         pictureBox1.Refresh();
                         break;
                     case Tool.DummyFill:
@@ -180,9 +178,9 @@ namespace Example2
                     case Tool.Fill:
                         break;
                     case Tool.Pallete:
-                        textBox1.ForeColor = GetColorAt(currentPoint);
-                        textBox1.BackColor = GetColorAt(currentPoint);
-                        pen.Color = GetColorAt(currentPoint);
+                        textBox1.ForeColor = GetColorAt(_currentPoint);
+                        textBox1.BackColor = GetColorAt(_currentPoint);
+                        _pen.Color = GetColorAt(_currentPoint);
                         break;
                     default:
                         break;
@@ -193,84 +191,86 @@ namespace Example2
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            prevPoint = e.Location;
-            currentPoint = e.Location;
-            isMousePressed = true;
+            _prevPoint = e.Location;
+            _currentPoint = e.Location;
+            _isMousePressed = true;
         }
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            isMousePressed = false;
+            _isMousePressed = false;
             
-            switch (currentTool)
+            switch (_currentTool)
             {
                 case Tool.Line:
-                    graphics.DrawLine(pen, prevPoint, currentPoint);
+                    _graphics.DrawLine(_pen, _prevPoint, _currentPoint);
                     break;
                 case Tool.Rectangle:
                     //graphics.DrawEllipse(Pens.Red, 50, 50, 100, 100);                 
-                    graphics.DrawRectangle(pen, GetMRectangle(prevPoint, currentPoint));
+                    _graphics.DrawRectangle(_pen, GetMRectangle(_prevPoint, _currentPoint));
                     break;
                 case Tool.Ellipse:
-                    graphics.DrawEllipse(pen, GetMRectangle(prevPoint, currentPoint));
+                    _graphics.DrawEllipse(_pen, GetMRectangle(_prevPoint, _currentPoint));
                     break;
                 case Tool.Pen:                   
                     break;
                 case Tool.Triangle:
-                    graphics.DrawPolygon(pen, Triangle(prevPoint, currentPoint));
+                    _graphics.DrawPolygon(_pen, Triangle(_prevPoint, _currentPoint));
                     break;
                 case Tool.Eraser:
-                    graphics.FillRectangle(new SolidBrush(Color.White), GetMRectangle(new Point(currentPoint.X - 10, currentPoint.Y - 10), new Point(currentPoint.X + 10, currentPoint.Y + 10)));
+                    _graphics.FillRectangle(new SolidBrush(Color.White), GetMRectangle(new Point(_currentPoint.X - 10, _currentPoint.Y - 10), new Point(_currentPoint.X + 10, _currentPoint.Y + 10)));
                     pictureBox1.Refresh();
                     break;
                 case Tool.DummyFill:
-                    currentPoint = e.Location;
-                    bitmap = Utils.Fill(bitmap, currentPoint, bitmap.GetPixel(e.X, e.Y), pen.Color);
-                    graphics = Graphics.FromImage(bitmap);
-                    pictureBox1.Image = bitmap;
+                    _currentPoint = e.Location;
+                    _bitmap = Utils.Fill(_bitmap, _currentPoint, _bitmap.GetPixel(e.X, e.Y), _pen.Color);
+                    _graphics = Graphics.FromImage(_bitmap);
+                    pictureBox1.Image = _bitmap;
                     pictureBox1.Refresh();
                     break;
                 case Tool.Fill:
                     MapFill mf = new MapFill();
-                    mf.Fill(graphics, currentPoint, pen.Color, ref bitmap);
-                    graphics = Graphics.FromImage(bitmap);
-                    pictureBox1.Image = bitmap;
+                    mf.Fill(_graphics, _currentPoint, _pen.Color, ref _bitmap);
+                    _graphics = Graphics.FromImage(_bitmap);
+                    pictureBox1.Image = _bitmap;
                     pictureBox1.Refresh();
                     break;
                 case Tool.Pallete:
                     if (e.Button == MouseButtons.Left)
                     {
-                        textBox1.ForeColor = GetColorAt(currentPoint);
-                        textBox1.BackColor = GetColorAt(currentPoint);
-                        pen.Color = GetColorAt(currentPoint);
+                        textBox1.ForeColor = GetColorAt(_currentPoint);
+                        textBox1.BackColor = GetColorAt(_currentPoint);
+                        _pen.Color = GetColorAt(_currentPoint);
                     }                       
+                    break;
+                case Tool.Rectangle:
                     break;
                 default:
                     break;
             }
-            prevPoint = e.Location;
+            _prevPoint = e.Location;
         }
 
         private void PictureBox1_Paint(object sender, PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             e.Graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-            switch (currentTool)
+            switch (_currentTool)
             {
                 case Tool.Line:
-                    e.Graphics.DrawLine(pen, prevPoint, currentPoint);
+                    e.Graphics.DrawLine(_pen, _prevPoint, _currentPoint);
                     break;
                 case Tool.Rectangle:
                     //e.Graphics.DrawEllipse(pen, GetMRectangle(prevPoint, currentPoint));
-                    e.Graphics.DrawRectangle(pen, GetMRectangle(prevPoint, currentPoint));
+                    e.Graphics.DrawRectangle(_pen, GetMRectangle(_prevPoint, _currentPoint));
                     break;
                 case Tool.Ellipse:
-                    e.Graphics.DrawEllipse(pen, GetMRectangle(prevPoint, currentPoint));
+                    e.Graphics.DrawEllipse(_pen, GetMRectangle(_prevPoint, _currentPoint));
                     break;
                 case Tool.Pen:
                     break;
                 case Tool.Triangle:
-                    e.Graphics.DrawPolygon(pen, Triangle(prevPoint, currentPoint));
+                    e.Graphics.DrawPolygon(_pen, Triangle(_prevPoint, _currentPoint));
                     break;
                 case Tool.DummyFill:     
                     break;
@@ -287,51 +287,51 @@ namespace Example2
 
         private void Button2_Click(object sender, EventArgs e)
         {
-            currentTool = Tool.Rectangle;
+            _currentTool = Tool.Rectangle;
         }
 
         private void Button3_Click(object sender, EventArgs e)
         {
-            currentTool = Tool.Pen;
+            _currentTool = Tool.Pen;
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            currentTool = Tool.Triangle;
+            _currentTool = Tool.Triangle;
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            ColorDialog MyDialog = new ColorDialog();
+            ColorDialog myDialog = new ColorDialog();
             // Keeps the user from selecting a custom color.
-            MyDialog.AllowFullOpen = true;
+            myDialog.AllowFullOpen = true;
             // Allows the user to get help. (The default is false.)
-            MyDialog.ShowHelp = true;
+            myDialog.ShowHelp = true;
             // Sets the initial color select to the current text color.
-            MyDialog.Color = textBox1.ForeColor;
+            myDialog.Color = textBox1.ForeColor;
             // Update the text box color if the user clicks OK 
-            if (MyDialog.ShowDialog() == DialogResult.OK)
+            if (myDialog.ShowDialog() == DialogResult.OK)
             {
-                textBox1.ForeColor = MyDialog.Color;
-                textBox1.BackColor = MyDialog.Color;
-                pen.Color = MyDialog.Color;
+                textBox1.ForeColor = myDialog.Color;
+                textBox1.BackColor = myDialog.Color;
+                _pen.Color = myDialog.Color;
             }
            
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
-            currentTool = Tool.Eraser;
+            _currentTool = Tool.Eraser;
         }
 
         private void button7_Click(object sender, EventArgs e)
         {
-            currentTool = Tool.DummyFill;
+            _currentTool = Tool.DummyFill;
         }
 
         private void button8_Click(object sender, EventArgs e)
         {
-            currentTool = Tool.Fill;
+            _currentTool = Tool.Fill;
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -346,7 +346,7 @@ namespace Example2
 
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
-            pen.Width = trackBar1.Value;
+            _pen.Width = trackBar1.Value;
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
@@ -361,7 +361,7 @@ namespace Example2
 
         private void button10_Click(object sender, EventArgs e)
         {
-            currentTool = Tool.Ellipse;
+            _currentTool = Tool.Ellipse;
         }
     }
 }
