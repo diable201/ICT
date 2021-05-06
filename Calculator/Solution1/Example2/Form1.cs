@@ -27,10 +27,9 @@ namespace Example2
         }
 
 
-        void buttonClicked(object sender, EventArgs e)
+        void ButtonClicked(object sender, EventArgs e)
         {
-            Button btn = sender as Button;
-            brain.ProcessSignal(btn.Text);
+            if (sender is Button btn) brain.ProcessSignal(btn.Text);
         }
 
         private void Form1_Load(object sender, EventArgs e)

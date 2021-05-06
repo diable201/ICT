@@ -6,25 +6,24 @@ using System.Threading.Tasks;
 
 namespace Example2
 {
+    internal delegate void DisplayMessage(string text);
 
-    delegate void DisplayMessage(string text);
-
-    class Brain
+    internal class Brain
     {
-        DisplayMessage displayMessage;
+        private readonly DisplayMessage _displayMessage;
         public Brain(DisplayMessage displayMessageDelegate)
         {
-            displayMessage = displayMessageDelegate;
+            _displayMessage = displayMessageDelegate;
         }
 
-        string[] nonZeroDigit = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-        string[] digit = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-        string[] zero = { "0" };
-        string[] operation = { "+", "-", "*", "/", "^", "log" };
+        string[] _nonZeroDigit = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+        string[] _digit = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+        string[] _zero = { "0" };
+        string[] _operation = { "+", "-", "*", "/", "^", "log" };
         string[] equal = { "=" };
         string[] separator = { "," };
 
-        enum State
+        private enum State
         {
             Zero,
             AccumulateDigits,
@@ -33,13 +32,13 @@ namespace Example2
             Compute,
         }
 
-        State currentState = State.Zero;
-        string previousNumber = "0";
-        string currentNumber = "";
-        string currentOperation = "";
+        private State _currentState = State.Zero;
+        private string _previousNumber = "0";
+        private string _currentNumber = "";
+        private string _currentOperation = "";
         public void ProcessSignal(string message)
         {
-            switch (currentState)
+            switch (_currentState)
             {
                 case State.Zero:
                     ProcessZeroState(message, false);
@@ -60,26 +59,23 @@ namespace Example2
                     break;
             }
 
-            if (message == "C")
-            {
-                currentState = State.Zero;
-                previousNumber = "";
-                currentNumber = "";
-                currentOperation = "";
-                displayMessage("0");
-                return;
-            }
+            if (message != "C") return;
+            _currentState = State.Zero;
+            _previousNumber = "";
+            _currentNumber = "";
+            _currentOperation = "";
+            _displayMessage("0");
         }
 
         void ProcessZeroState(string msg, bool income)
         {
             if (income)
             {
-                currentState = State.Zero;
+                _currentState = State.Zero;
             }
             else
             {
-                if (nonZeroDigit.Contains(msg))
+                if (_nonZeroDigit.Contains(msg))
                 {
                     ProcessAccumulateDigits(msg, true);
                 }
@@ -91,23 +87,23 @@ namespace Example2
         {
             if (income)
             {
-                currentState = State.AccumulateDigits;
-                if (zero.Contains(currentNumber))
+                _currentState = State.AccumulateDigits;
+                if (_zero.Contains(_currentNumber))
                 {
-                    currentNumber = msg;
+                    _currentNumber = msg;
                 }
                 else
                 {
-                    currentNumber += msg;
+                    _currentNumber += msg;
                 }
-                displayMessage(currentNumber);
+                _displayMessage(_currentNumber);
             }
             else
             {
-                if (digit.Contains(msg))
+                if (_digit.Contains(msg))
                 {
                     ProcessAccumulateDigits(msg, true);
-                } else if (operation.Contains(msg))
+                } else if (_operation.Contains(msg))
                 {
                     ProcessComputePending(msg, true);
                 } 
@@ -127,32 +123,32 @@ namespace Example2
         {
             if (income)
             {
-                currentState = State.AccumulateDigitsDecimal;
+                _currentState = State.AccumulateDigitsDecimal;
                 if (separator.Contains(msg))
                 {
-                    if (currentNumber == "")
+                    if (_currentNumber == "")
                     {
-                        currentNumber = previousNumber + msg;
+                        _currentNumber = _previousNumber + msg;
                     }
                     else 
                     {
-                        currentNumber += msg;
+                        _currentNumber += msg;
                     }
                     
                 }
-                else if (digit.Contains(msg))
+                else if (_digit.Contains(msg))
                 {
-                    currentNumber += msg;
+                    _currentNumber += msg;
                 }
-                displayMessage(currentNumber);
+                _displayMessage(_currentNumber);
             }
             else
             {
-                if (digit.Contains(msg))
+                if (_digit.Contains(msg))
                 {
                     ProccesAccumulateDigitsDecimal(msg, true);
                 }
-                else if (operation.Contains(msg))
+                else if (_operation.Contains(msg))
                 {
                     ProcessComputePending(msg, true);
                 }
@@ -167,14 +163,14 @@ namespace Example2
         {
             if (income)
             {
-                currentState = State.ComputePending;
-                previousNumber = currentNumber;
-                currentNumber = "";
-                currentOperation = msg;
+                _currentState = State.ComputePending;
+                _previousNumber = _currentNumber;
+                _currentNumber = "";
+                _currentOperation = msg;
             }
             else
             {
-                if (digit.Contains(msg))
+                if (_digit.Contains(msg))
                 {
                     ProcessAccumulateDigits(msg, true);
                 }
@@ -185,69 +181,65 @@ namespace Example2
         {   
             if (income)
             {
-                currentState = State.Compute;
-
-                double a = double.Parse(previousNumber);
-                
-                double b = double.Parse(currentNumber);
-                if (currentOperation == "+")
+                _currentState = State.Compute;
+                double a = double.Parse(_previousNumber);
+                double b = double.Parse(_currentNumber);
+                if (_currentOperation == "+")
                 {
-                    currentNumber = (a + b).ToString();
+                    _currentNumber = (a + b).ToString();
                 } 
-                else if (currentOperation == "-")
+                else if (_currentOperation == "-")
                 {
-                    currentNumber = (a - b).ToString();
+                    _currentNumber = (a - b).ToString();
                 } 
-                else if (currentOperation == "*")
+                else if (_currentOperation == "*")
                 {
-                    currentNumber = (a * b).ToString();
+                    _currentNumber = (a * b).ToString();
                 } 
-                else if (currentOperation == "/")
+                else if (_currentOperation == "/")
                 { 
                     if (b != 0)
                     {
-                        currentNumber = (a / b).ToString();
+                        _currentNumber = (a / b).ToString();
                     } 
                     else
                     {
-                        currentNumber = ("Divide By Zero").ToString();
-                        if (zero.Contains(msg))
+                        _currentNumber = ("Divide By Zero").ToString();
+                        if (_zero.Contains(msg))
                         {
-                            currentNumber = "";
-                            previousNumber = "";
-                            displayMessage("0"); 
+                            _currentNumber = "";
+                            _previousNumber = "";
+                            _displayMessage("0"); 
                             ProcessZeroState(msg, true);
                         }
                     }
-
                 } 
-                else if (currentOperation == "^")
+                else if (_currentOperation == "^")
                 {
-                    currentNumber = (Math.Pow(a, b)).ToString();
+                    _currentNumber = Math.Pow(a, b).ToString();
                 }
-                else if (currentOperation == "log")
+                else if (_currentOperation == "log")
                 {
-                    currentNumber = (Math.Log(a, b)).ToString();
+                    _currentNumber = Math.Log(a, b).ToString();
                 }
-
-                previousNumber = currentNumber;
-                displayMessage(currentNumber);
+                _previousNumber = _currentNumber;
+                _displayMessage(_currentNumber);
                 //currentOperation = "";
             }
             else
             {
-                if (nonZeroDigit.Contains(msg))
+                if (_nonZeroDigit.Contains(msg))
                 {
                     ProcessAccumulateDigits(msg, true);
                 }
-                else if (operation.Contains(msg))
+                else if (_operation.Contains(msg))
                 {
                     ProcessComputePending(msg, true);
                 }
-                else if (zero.Contains(msg))
+                else if (_zero.Contains(msg))
                 {
-                    currentNumber = "";
-                    displayMessage("0");
+                    _currentNumber = "";
+                    _displayMessage("0");
                     ProcessZeroState(msg, true);
                 }
                 else if (separator.Contains(msg))
