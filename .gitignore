@@ -373,3 +373,4 @@ _NCrunch*
 
 # Visual Studio Code
 .vscode/
+*.exe
